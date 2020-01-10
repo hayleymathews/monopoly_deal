@@ -25,7 +25,10 @@ def pay_from_bank(amount_owed,
                   used_money=None,
                   unused_money=None):
     """
-    make a payment from bank
+    make a payment from bank account
+    monopdeal doesnt make change
+    so if you get charged $1M and all you have is a $10M bill
+    welp, that sucks
 
     Arguments:
         amount_owed {int} -- amount to pay
@@ -58,6 +61,7 @@ def pay_from_bank(amount_owed,
                                          used_money + [],
                                          unused_money + [available_money[0]])
 
+    # try and hit exact payment, without overpaying, using the fewest amount of bills
     return min(use_first_money, dont_use_first_money,
                key=lambda x: (x.owed, -x.overpaid, len(x.paid)))
 

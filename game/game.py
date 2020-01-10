@@ -180,6 +180,13 @@ class MonopDealGame(object):
     def _lay_bonus_property(self,
                             player,
                             card):
+        """
+        add a house or a hotel to a complete property to jack up rent
+
+        Arguments:
+            player {Player} -- player adding bonus
+            card {action_card} -- hotel or house card
+        """
         full_sets = [(prop_set, get_rent(prop_set, properties))
                      for prop_set, properties in self.board.properties(player).items()
                      if check_full_set(prop_set, properties)]
@@ -266,7 +273,19 @@ class MonopDealGame(object):
             [self._deposit_money(collector, money) for money in moneys]
             [self._lay_property(collector, card) for card in properties]
 
-    def _pay(self, player, amount):
+    def _pay(self,
+             player,
+             amount):
+        """
+        cough up the dough to cover a debt
+
+        Arguments:
+            player {Player} -- player paying money
+            amount {int} -- amount owed
+
+        Returns:
+            tuple -- ([money cards paid], [property cards paid])
+        """
         # try to pay debt off using money in the bank first
         bank_payment = pay_from_bank(amount, self.board.bank(player))
         self.board.reset_bank(player, bank_payment.remaining)
