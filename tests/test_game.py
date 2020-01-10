@@ -8,4 +8,5 @@ class TestGame(unittest.TestCase):
     def test_game(self):
         players = [Player('bot1'), Player('bot2')]
         mdg = MonopDealGame(players)
-        self.assertTrue(mdg.play_game())
+        winner = mdg.play_game()
+        self.assertTrue(winner)
