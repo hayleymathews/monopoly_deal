@@ -8,8 +8,19 @@ from .utils import pay_from_bank, pay_from_properties, check_full_set, get_rent,
 
 
 class MonopDealGame(object):
+    """
+    like the regular monopoly game, proof that capitalism is a bit evil
+    but unlike regular monopoly, this one eventually ends (possibly in tears)
+    """
 
-    def __init__(self, players):
+    def __init__(self,
+                 players):
+        """
+        set up mdg game
+
+        Arguments:
+            players {list} -- list of Player instances
+        """
         self.players = players
         self.rent_level = 1  # TODO: sloppy
         self.deck = Deck(CARDS)
@@ -17,6 +28,12 @@ class MonopDealGame(object):
         [player.draw_cards(self.deck, 5) for player in self.players]
 
     def play_game(self):
+        """
+        play a complete game until a player has won
+
+        Returns:
+            Player -- winning player
+        """
         winner = False
         rounds = 0  # TODO: write some tests, make sure this terminates
         while not winner and rounds < 1000:
@@ -25,16 +42,32 @@ class MonopDealGame(object):
         return winner
 
     def play_round(self):
+        """
+        play a round where each player takes a turn
+
+        Returns:
+            bool -- Player if winner, else None
+        """
         for player in self.players:
             self.take_turn(player)
-            winner = self.check_win_condition()
+            winner = self._check_win_condition()
             if winner:
                 return winner
 
-    def take_turn(self, player):
-        self.rent_level = 1
+    def take_turn(self,
+                  player):
+        """
+        in each turn a player must:
+            1) draw 2 cards
+            2) play up to 3 cards from their hand
+            3) discard cards to maintain hand limit of 7
+
+        Arguments:
+            player {Player} -- player instance
+        """
+        self.rent_level, actions = 1, 3
         player.draw_cards(self.deck, 2)
-        actions = 3
+
         while actions:
             actions -= 1
             card = player.choose_action(player.hand + ['end turn'])
@@ -42,9 +75,16 @@ class MonopDealGame(object):
                 break
             player.hand.remove(card)
             self._card_map[type(card)](player, card)
+
         self.deck.discard_cards(player.discard_cards())
 
-    def check_win_condition(self):
+    def _check_win_condition(self):
+        """
+        to win a game a player must have 3 full property sets
+
+        Returns:
+            bool -- Player if winner, else False
+        """
         for player in self.players:
             full_sets = [prop_set for prop_set, properties in self.board.properties(player).items()
                          if check_full_set(prop_set, properties)]
@@ -60,14 +100,45 @@ class MonopDealGame(object):
                 action_card: self._do_action,
                 }
 
-    def _deposit_money(self, player, card):
+    def _deposit_money(self,
+                       player,
+                       card):
+        """
+        put money in bank for player
+
+        Arguments:
+            player {Player} -- player getting money
+            card {money_card} -- money
+        """
         self.board.bank(player).append(card)
 
-    def _lay_property(self, player, card):
+    def _lay_property(self,
+                      player,
+                      card):
+        """
+        place property on board for player
+        where it can now:
+            count towards being a property set
+            have rent collected on it
+            be stolen by another player ...
+
+        Arguments:
+            player {Player} -- player playing property
+            card {property_card} -- property
+        """
         property_set = player.choose_action(card.colors)
         self.board.properties(player)[property_set].append(card)
 
-    def _collect_rent(self, player, card):
+    def _collect_rent(self,
+                      player,
+                      card):
+        """
+        collect rent from other players
+
+        Arguments:
+            player {Player} -- player collecting rent
+            card {rent_card} -- rent
+        """
         property_set = player.choose_action(card.colors)
         rent = get_rent(property_set, self.board.properties(player)[property_set]) * self.rent_level
         if not rent:
@@ -79,19 +150,9 @@ class MonopDealGame(object):
 
         self.deck.discard_cards([card])
 
-    def _collect_money(self, collector, amount_owed, payers):
-        for payer in payers:
-            say_no_card = payer.say_no()
-            if say_no_card:
-                self.deck.discard_cards([say_no_card])
-                continue
-
-            moneys, properties = self._pay(payer, amount_owed)
-            [self._deposit_money(collector, money) for money in moneys]
-            [self._lay_property(collector, card) for card in properties]
-
     def _do_action(self, player, card):
-        if card.action == 'debt_collector':
+        # TODO: clean up ugly long if
+        if card.action == 'debt collector':
             collect_from = [player.choose_action(self.other_players(player))]
             self._collect_money(player, 5000000, collect_from)
         elif card.action == 'it\'s my birthday':
@@ -117,7 +178,20 @@ class MonopDealGame(object):
     def other_players(self, player):
         return [x for x in self.players if x != player]
 
-    def _steal_property_set(self, player, full_sets=False, swap=False):
+    def _steal_property_set(self,
+                            player,
+                            full_sets=False,
+                            swap=False):
+        """
+        steal some properties from other players, because life is cruel
+
+        Arguments:
+            player {Player} -- player making the steal
+
+        Keyword Arguments:
+            full_sets {bool} -- if True, player can take full property sets from opponents (default: {False})
+            swap {bool} -- if True, player must give up a property of their own in trade (default: {False})
+        """
         other_players = self.other_players(player)
         if full_sets:
             sets = [(victim, prop_set, properties) for victim in other_players
@@ -129,6 +203,7 @@ class MonopDealGame(object):
                     if victim != player and not check_full_set(prop_set, properties)
                     for prop in properties]
         if not sets:
+            # nothing to steal
             return
 
         if swap:
@@ -136,21 +211,48 @@ class MonopDealGame(object):
                            if not check_full_set(prop_set, properties)
                            for prop in properties]
             if not player_sets:
+                # no properties to trade for
                 return
 
         victim, prop_set, properties = player.choose_action(sets)
+        # give victim a chance to defend their property
         say_no_card = victim.say_no()
         if say_no_card:
             self.deck.discard_cards([say_no_card])
             return
 
+        # take properties from victim and give them to player
         self.board.reset_properties(victim, prop_set, properties)
         [self._lay_property(player, prop) for prop in properties]
 
         if swap:
+            # take properties from player and give them to victim
             swap_set, swap_props = player.choose_action(player_sets)
             self.board.reset_properties(player, swap_set, swap_props)
             [self._lay_property(victim, prop) for prop in swap_props]
+
+    def _collect_money(self,
+                       collector,
+                       amount_owed,
+                       payers):
+        """
+        collect money from debtors, forceclose their property too maybe
+
+        Arguments:
+            collector {Player} -- player collecting money
+            amount_owed {int} -- amount of money owed
+            payers {list} -- list of Players owing money
+        """
+        for payer in payers:
+            say_no_card = payer.say_no()
+            if say_no_card:  # debt forgiveness!
+                self.deck.discard_cards([say_no_card])
+                continue
+
+            # its a cruel cruel world
+            moneys, properties = self._pay(payer, amount_owed)
+            [self._deposit_money(collector, money) for money in moneys]
+            [self._lay_property(collector, card) for card in properties]
 
     def _pay(self, player, amount):
         # try to pay debt off using money in the bank first
@@ -160,10 +262,10 @@ class MonopDealGame(object):
         if not bank_payment.owed:
             return bank_payment.paid, []
 
-        # start taking properties if you still owe money
+        # foreclosure time, start taking properties if you still owe money
+        # TODO: allow players to pick which properties they want to give up
         property_payment = pay_from_properties(bank_payment.owed, self.board.properties(player))
 
-        # TODO: sloppy
         self.board.reset_properties(player)
         [self._lay_property(player, card) for card in property_payment.remaining]
 
