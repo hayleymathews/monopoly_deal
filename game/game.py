@@ -168,18 +168,27 @@ class MonopDealGame(object):
             self._steal_property_set(player, full_sets=False)
         elif card.action == 'forced deal':
             self._steal_property_set(player, full_sets=False, swap=True)
-        elif card.action == 'house':
-            pass
-        elif card.action == 'hotel':
-            pass
-
-
-        # TODO: other action cards
+        elif card.action in ['house', 'hotel']:
+            self._lay_bonus_property(player, card)
+            return
 
         self.deck.discard_cards([card])
 
     def other_players(self, player):
         return [x for x in self.players if x != player]
+
+    def _lay_bonus_property(self,
+                            player,
+                            card):
+        full_sets = [(prop_set, get_rent(prop_set, properties))
+                     for prop_set, properties in self.board.properties(player).items()
+                     if check_full_set(prop_set, properties)]
+        if not full_sets:
+            # cant get fancy on an incomplete property set
+            return
+
+        property_set, _ = player.choose_action(full_sets)
+        self.board.properties(player)[property_set].append(card)
 
     def _steal_property_set(self,
                             player,

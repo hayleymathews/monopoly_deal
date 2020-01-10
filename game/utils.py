@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from .cards import RENTS
+from .cards import RENTS, action_card
 
 payment_tuple = namedtuple('payment', ['paid', 'owed', 'overpaid', 'remaining'])
 
@@ -119,7 +119,7 @@ def check_full_set(property_set,
     Returns:
         bool
     """
-    return len(properties) == len(RENTS[property_set])
+    return len(properties) >= len(RENTS[property_set])
 
 
 def get_rent(property_set,
@@ -139,4 +139,7 @@ def get_rent(property_set,
     try:
         return RENTS[property_set][len(properties) - 1]
     except IndexError:
-        return RENTS[property_set][-1]
+        # handle houses, hotels
+        rent = RENTS[property_set][-1]
+        rent_bonuses = sum(x.value for x in properties if type(x) == action_card)
+        return rent + rent_bonuses

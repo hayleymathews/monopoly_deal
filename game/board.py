@@ -8,6 +8,8 @@ class Board(object):
         self.players = players
         self._banks = {player.name: [] for player in self.players}
         self._properties = {player.name: defaultdict(list) for player in self.players}
+        self._houses = {player.name: defaultdict(list) for player in self.players}
+        self._hotels = {player.name: defaultdict(list) for player in self.players}
 
     def __repr__(self):
         # TODO: better here
