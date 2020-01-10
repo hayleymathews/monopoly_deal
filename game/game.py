@@ -155,6 +155,8 @@ class MonopDealGame(object):
         if card.action == 'debt collector':
             collect_from = [player.choose_action(self.other_players(player))]
             self._collect_money(player, 5000000, collect_from)
+        elif card.action == 'double the rent':
+            self.rent_level *= 2
         elif card.action == 'it\'s my birthday':
             collect_from = self.other_players(player)
             self._collect_money(player, 2000000, collect_from)
@@ -170,6 +172,7 @@ class MonopDealGame(object):
             pass
         elif card.action == 'hotel':
             pass
+
 
         # TODO: other action cards
 
