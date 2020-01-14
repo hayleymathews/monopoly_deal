@@ -88,11 +88,13 @@ def pay_from_properties(amount_owed,
         return payment_tuple(properties, max(paid_off, 0), 0 - paid_off, [])
 
     # seperate out properties into singles, and sets (which are more valuable)
-    singles, partial_sets, full_sets = [], [], []
+    singles, nonsingles, partial_sets, full_sets = [], [], [], []
     for prop_set, properties in available_properties.items():
         if check_full_set(prop_set, properties):
+            nonsingles.extend(properties)
             full_sets.append((properties, get_rent(prop_set, properties)))
         elif len(properties) > 1:
+            nonsingles.extend(properties)
             partial_sets.append((properties, get_rent(prop_set, properties)))
         else:
             singles.extend(properties)
@@ -101,14 +103,15 @@ def pay_from_properties(amount_owed,
     # try to pay off using just single properties
     payment = pay_from_bank(amount_owed, singles)
     if not payment.owed:
-        return payment
+        return payment_tuple(payment.paid, payment.owed, payment.overpaid, payment.remaining + nonsingles)
 
     # start breaking into partial and full property sets
     while payment.owed and property_sets:
         smallest_set, property_sets = property_sets[0], property_sets[1:]
         payment = pay_from_bank(payment.owed, smallest_set[0] + payment.remaining, payment.paid)
 
-    return payment
+    unused_properties = [prop for properties, _ in property_sets for prop in properties]
+    return payment_tuple(payment.paid, payment.owed, payment.overpaid, payment.remaining + unused_properties)
 
 
 def check_full_set(property_set,

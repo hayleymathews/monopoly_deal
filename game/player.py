@@ -13,7 +13,8 @@ class Player(object):
         self.hand = []
 
     def choose_action(self, actions):
-        return random.choice(actions)
+        return random.choice([action for action in actions
+                              if not (type(action) == action_card and action.action == 'just say no')])
 
     def discard_cards(self):
         self.hand, discard = self.hand[:7], self.hand[7:]

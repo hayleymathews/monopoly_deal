@@ -13,12 +13,9 @@ class Deck(object):
         self.discards = []
 
     def draw_cards(self, num_cards):
-        try:
-            cards, self.cards = self.cards[:num_cards], self.cards[num_cards:]
-        except IndexError:
+        if not self.cards:
             self.add_discards()
-            cards, self.cards = self.cards[:num_cards], self.cards[num_cards:]
-
+        cards, self.cards = self.cards[:num_cards], self.cards[num_cards:]
         return cards
 
     def discard_cards(self, cards):

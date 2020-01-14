@@ -98,7 +98,6 @@ PROPERTY_CARDS = [
     property_card([YELLOW], 'Ventnor Avenue', 3000000),
     property_card([YELLOW], 'Marvin Gardens', 3000000),
     property_card([YELLOW], 'Atlantic Avenue', 3000000),
-    property_card([YELLOW], 'Atlantic Avenue', 3000000),
     property_card([DARK_BLUE, GREEN], WILD_CARD, 4000000),
     property_card([LIGHT_BLUE, BROWN], WILD_CARD, 1000000),
     property_card(COLORS, WILD_CARD, 0),
@@ -108,6 +107,7 @@ PROPERTY_CARDS = [
     property_card([GREEN, RAILROAD], WILD_CARD, 4000000),
     property_card([LIGHT_BLUE, RAILROAD], WILD_CARD, 4000000),
     property_card([UTILITY, RAILROAD], WILD_CARD, 2000000),
+    property_card([YELLOW, RED], WILD_CARD, 3000000),
     property_card([YELLOW, RED], WILD_CARD, 3000000),
 ]
 
