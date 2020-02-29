@@ -144,8 +144,12 @@ class MonopDealGame(object):
         Keyword Arguments:
             property_set {str} -- prop set to play property for (default: {None})
         """
-        property_set = property_set or player.choose_action(card.colors)
-        self.board.properties(player)[property_set].append(card)
+        if type(card) ==  action_card:
+            # TODO: hacky as shit, handle this elsewhere
+            self._lay_bonus_property(player, card)
+        else:
+            property_set = property_set or player.choose_action(card.colors)
+            self.board.properties(player)[property_set].append(card)
 
     def _collect_rent(self,
                       player,
