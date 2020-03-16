@@ -1,6 +1,7 @@
 
 from collections import defaultdict
 from .utils import check_full_set, get_rent
+from .cards import RENTS
 
 
 class Board(object):
@@ -18,7 +19,7 @@ class Board(object):
                 print('  ' + str(mc))
             print('PROPERTIES count: ' + str(sum(1 for props in self._properties[player.name].values() for prop in props)))
             for color, props in self._properties[player.name].items():
-                print('  ' + color +' rent: $' + str(get_rent(color, props)))
+                print('  ' + color + '    rent: $' + str(get_rent(color, props)) + '    ' + str(len(props)) + '/' + str(len(RENTS[color])))
                 if check_full_set(color, props):
                     print('  ' + '************')
                 for prop in props:
