@@ -1,7 +1,7 @@
 
 from collections import defaultdict
-from .utils import check_full_set, get_rent
-from .cards import RENTS
+from utils import check_full_set, get_rent
+from cards import RENTS
 
 
 class Board(object):

@@ -1,10 +1,10 @@
 import numpy as np
 from collections import defaultdict
 
-from .cards import CARDS, money_card, action_card, property_card, rent_card, action_card
-from .deck import Deck
-from .board import Board
-from .utils import pay_from_bank, pay_from_properties, check_full_set, get_rent, cached_property
+from cards import CARDS, money_card, action_card, property_card, rent_card, action_card
+from deck import Deck
+from board import Board
+from utils import pay_from_bank, pay_from_properties, check_full_set, get_rent, cached_property
 
 
 class MonopDealGame(object):
@@ -256,7 +256,7 @@ class MonopDealGame(object):
             print('{} stealing {} from {}'.format(player.name, str(properties), victim.name))
 
         # take properties from victim and give them to player
-        [self._lay_property(player, prop, prop_set) for prop in properties]
+        [self._lay_property(player, prop) for prop in properties]
         self.board.reset_properties(victim, prop_set, properties)
 
         if swap:

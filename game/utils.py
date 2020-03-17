@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from .cards import RENTS, action_card
+from cards import RENTS, action_card
 
 payment_tuple = namedtuple('payment', ['paid', 'owed', 'overpaid', 'remaining'])
 
