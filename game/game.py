@@ -77,13 +77,18 @@ class MonopDealGame(object):
 
         while actions:
             actions -= 1
-            card = player.choose_action(player.hand + ['end turn'])
+            card = player.choose_action(player.hand + ['end turn', 'show board'])
             if self.verbose:
                 print(player.name, card)
             if card == 'end turn':
                 break
-            player.hand.remove(card)
-            self._card_map[type(card)](player, card)
+            if card == 'show board':
+                # TODO: this is hacky and gross but to make terminal play easier
+                actions += 1
+                self.board.show_board()
+            else:
+                player.hand.remove(card)
+                self._card_map[type(card)](player, card)
 
         self.deck.discard_cards(player.discard_cards())
         if self.verbose:

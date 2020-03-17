@@ -11,6 +11,9 @@ class Player(object):
         self.hand_limit = 7
         self.hand = []
 
+    def __repr__(self):
+        return self.name
+
     def draw_cards(self, deck, count):
         """
         add cards to hand
