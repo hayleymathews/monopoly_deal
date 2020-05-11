@@ -1,10 +1,10 @@
 import numpy as np
 from collections import defaultdict
 
-from cards import CARDS, money_card, action_card, property_card, rent_card, action_card
-from deck import Deck
-from board import Board
-from utils import pay_from_bank, pay_from_properties, check_full_set, get_rent, cached_property
+from .cards import CARDS, money_card, action_card, property_card, rent_card, action_card
+from .deck import Deck
+from .board import Board
+from .utils import pay_from_bank, pay_from_properties, check_full_set, get_rent, cached_property
 
 
 class MonopDealGame(object):
@@ -30,6 +30,7 @@ class MonopDealGame(object):
         self.rent_level = 1  # TODO: sloppy
         self.deck = Deck(CARDS)
         self.board = Board(players)
+        self.extra_cards = ['end turn', 'show board'] if verbose else ['end turn']
         [player.draw_cards(self.deck, 5) for player in self.players]
 
     def play_game(self):
@@ -77,7 +78,7 @@ class MonopDealGame(object):
 
         while actions:
             actions -= 1
-            card = player.choose_action(player.hand + ['end turn', 'show board'])
+            card = player.choose_action(player.hand + self.extra_cards)
             if self.verbose:
                 print(player.name, card)
             if card == 'end turn':
@@ -149,7 +150,7 @@ class MonopDealGame(object):
         Keyword Arguments:
             property_set {str} -- prop set to play property for (default: {None})
         """
-        if type(card) ==  action_card:
+        if type(card) == action_card:
             # TODO: hacky as shit, handle this elsewhere
             self._lay_bonus_property(player, card)
         else:

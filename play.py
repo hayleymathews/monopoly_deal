@@ -1,5 +1,5 @@
-from game import MonopDealGame
-from player import RandomPlayer, TerminalPlayer
+from game.game import MonopDealGame
+from game.player import RandomPlayer, TerminalPlayer
 
 if __name__ == "__main__":
     player_name = input('enter your name: ')

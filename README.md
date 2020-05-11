@@ -7,7 +7,7 @@ rules and cards taken from [here](http://monopolydealrules.com/)
 
 to play:  
 ```
-python game/play.py
+python play.py
 ```
 
 

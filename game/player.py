@@ -1,5 +1,5 @@
 import random
-from cards import action_card
+from .cards import action_card
 
 
 class Player(object):
