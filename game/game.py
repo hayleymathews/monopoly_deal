@@ -48,7 +48,7 @@ class MonopDealGame(object):
             winner = self.play_round()
             rounds += 1
         if self.verbose:
-            self.write_all_players('Winner: {} in {} rounds\n'.format(winner.name, rounds))
+            self.write_all_players('\rWinner: {} in {} rounds\n'.format(winner.name, rounds))
         return winner
 
     def play_round(self):
@@ -89,7 +89,7 @@ class MonopDealGame(object):
                 player.write(self.board.show_board())
             else:
                 if self.verbose:
-                    self.write_all_players("{} played {}\n".format(player.name, card))
+                    self.write_all_players("\r{} played {}\n\r".format(player.name, card))
                 player.hand.remove(card)
                 self._card_map[type(card)](player, card)
 
@@ -261,7 +261,7 @@ class MonopDealGame(object):
             return
 
         if self.verbose:
-            self.write_all_players('{} stealing {} from {}\n'.format(player.name, str(properties), victim.name))
+            self.write_all_players('\r{} stealing {} from {}\n'.format(player.name, str(properties), victim.name))
 
         # take properties from victim and give them to player
         [self._lay_property(player, prop) for prop in properties]
@@ -273,7 +273,7 @@ class MonopDealGame(object):
             self.board.reset_properties(player, swap_set, swap_props)
             [self._lay_property(victim, prop) for prop in swap_props]
             if self.verbose:
-                self.write_all_players('{} giving {} to {}\n'.format(player.name, str(swap_props), victim.name))
+                self.write_all_players('\r{} giving {} to {}\n'.format(player.name, str(swap_props), victim.name))
 
     def _collect_money(self,
                        collector,
@@ -288,7 +288,7 @@ class MonopDealGame(object):
             payers {list} -- list of Players owing money
         """
         if self.verbose:
-            self.write_all_players('{} collecting {} from {}\n'.format(collector.name, amount_owed, str([x.name for x in payers])))
+            self.write_all_players('\r{} collecting {} from {}\n'.format(collector.name, amount_owed, str([x.name for x in payers])))
 
         for payer in payers:
             say_no_card = payer.say_no()
