@@ -13,6 +13,7 @@ nest_asyncio.apply()
 players = []
 joined = []
 bot_players = []
+num_bots = 0
 
 
 @asyncio.coroutine
@@ -23,13 +24,14 @@ def shell(reader, writer):
     inp = yield from reader.readline()
     players.append(TelNetPlayer(inp.rstrip(), writer, reader))
 
-    writer.write('\renter number of bot players: \r\n')
-    inp = yield from reader.readline()
-    try:
-        num_bots = int(inp.rstrip())
-    except:
-        num_bots = 0
-    bot_players.extend([RandomPlayer('bot {}'.format(n + 1)) for n in range(num_bots)])
+    if len(players) == 1:
+        writer.write('\renter number of bot players: \r\n')
+        inp = yield from reader.readline()
+        try:
+            num_bots = int(inp.rstrip())
+        except:
+            num_bots = 0
+        bot_players.extend([RandomPlayer('bot {}'.format(n + 1)) for n in range(num_bots)])
 
     writer.write('\rready? \r\n')
     inp = yield from reader.read(10)
