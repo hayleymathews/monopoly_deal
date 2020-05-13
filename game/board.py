@@ -12,19 +12,21 @@ class Board(object):
 
     def show_board(self):
         # TODO: better here
+        board = "-" * 100 + '\n'
         for player in self.players:
-            print(player.name)
-            print('BANK value: $' + str(sum(x.value for x in self._banks[player.name])))
+            board += "{}\n".format(player.name)
+            board += "BANK value: $" + str(sum(x.value for x in self._banks[player.name])) + "\n"
             for mc in self._banks[player.name]:
-                print('  ' + str(mc))
-            print('PROPERTIES count: ' + str(sum(1 for props in self._properties[player.name].values() for prop in props)))
+                board += "  " + str(mc) + "\n"
+            board += "PROPERTIES count: " + str(sum(1 for props in self._properties[player.name].values() for prop in props)) + "\n"
             for color, props in self._properties[player.name].items():
-                print('  ' + color + '    rent: $' + str(get_rent(color, props)) + '    ' + str(len(props)) + '/' + str(len(RENTS[color])))
+                board += '  ' + color + '    rent: $' + str(get_rent(color, props)) + '    ' + str(len(props)) + '/' + str(len(RENTS[color])) + "\n"
                 if check_full_set(color, props):
-                    print('  ' + '************')
+                    board += "  " + "************ \n"
                 for prop in props:
-                    print('    ' + str(prop))
-            print()
+                    board += "    " + str(prop) + "\n"
+        board += "-" * 100 + '\n'
+        return board
 
     def properties(self, player):
         return self._properties[player.name]

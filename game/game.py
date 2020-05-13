@@ -1,10 +1,12 @@
-import numpy as np
 from collections import defaultdict
+import numpy as np
 
-from .cards import CARDS, money_card, action_card, property_card, rent_card, action_card
-from .deck import Deck
 from .board import Board
-from .utils import pay_from_bank, pay_from_properties, check_full_set, get_rent, cached_property
+from .cards import (CARDS, END_TURN, SHOW_BOARD, action_card, money_card,
+                    property_card, rent_card)
+from .deck import Deck
+from .utils import (cached_property, check_full_set, get_rent, pay_from_bank,
+                    pay_from_properties)
 
 
 class MonopDealGame(object):
@@ -30,7 +32,7 @@ class MonopDealGame(object):
         self.rent_level = 1  # TODO: sloppy
         self.deck = Deck(CARDS)
         self.board = Board(players)
-        self.extra_cards = ['end turn', 'show board'] if verbose else ['end turn']
+        self.actions = [END_TURN, SHOW_BOARD] if verbose else [END_TURN]
         [player.draw_cards(self.deck, 5) for player in self.players]
 
     def play_game(self):
@@ -46,7 +48,7 @@ class MonopDealGame(object):
             winner = self.play_round()
             rounds += 1
         if self.verbose:
-            print('Winner: {} in {} rounds'.format(winner.name, rounds))
+            self.write_all_players('Winner: {} in {} rounds\n'.format(winner.name, rounds))
         return winner
 
     def play_round(self):
@@ -78,22 +80,22 @@ class MonopDealGame(object):
 
         while actions:
             actions -= 1
-            card = player.choose_action(player.hand + self.extra_cards)
-            if self.verbose:
-                print(player.name, card)
-            if card == 'end turn':
+            card = player.choose_action(player.hand + self.actions)
+            if card == END_TURN:
                 break
-            if card == 'show board':
+            if card == SHOW_BOARD:
                 # TODO: this is hacky and gross but to make terminal play easier
                 actions += 1
-                self.board.show_board()
+                player.write(self.board.show_board())
             else:
+                if self.verbose:
+                    self.write_all_players("{} played {}\n".format(player.name, card))
                 player.hand.remove(card)
                 self._card_map[type(card)](player, card)
 
         self.deck.discard_cards(player.discard_cards())
         if self.verbose:
-            self.board.show_board()
+            self.write_all_players(self.board.show_board())
 
     def _check_win_condition(self):
         """
@@ -259,7 +261,7 @@ class MonopDealGame(object):
             return
 
         if self.verbose:
-            print('{} stealing {} from {}'.format(player.name, str(properties), victim.name))
+            self.write_all_players('{} stealing {} from {}\n'.format(player.name, str(properties), victim.name))
 
         # take properties from victim and give them to player
         [self._lay_property(player, prop) for prop in properties]
@@ -271,7 +273,7 @@ class MonopDealGame(object):
             self.board.reset_properties(player, swap_set, swap_props)
             [self._lay_property(victim, prop) for prop in swap_props]
             if self.verbose:
-                print('{} giving {} to {}'.format(player.name, str(swap_props), victim.name))
+                self.write_all_players('{} giving {} to {}\n'.format(player.name, str(swap_props), victim.name))
 
     def _collect_money(self,
                        collector,
@@ -286,7 +288,7 @@ class MonopDealGame(object):
             payers {list} -- list of Players owing money
         """
         if self.verbose:
-            print('{} collecting {} from {}'.format(collector.name, amount_owed, str([x.name for x in payers])))
+            self.write_all_players('{} collecting {} from {}\n'.format(collector.name, amount_owed, str([x.name for x in payers])))
 
         for payer in payers:
             say_no_card = payer.say_no()
@@ -343,3 +345,13 @@ class MonopDealGame(object):
             list -- list of Players
         """
         return [x for x in self.players if x != player]
+
+    def write_all_players(self, message):
+        """
+        write a message to all players
+
+        Arguments:
+            message {str} -- message to send
+        """
+        for player in self.players:
+            player.write(message)

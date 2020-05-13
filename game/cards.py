@@ -1,5 +1,8 @@
 from collections import namedtuple
 
+END_TURN = 'end turn'
+SHOW_BOARD = 'show board'
+
 BROWN = 'brown'
 DARK_BLUE = 'dark blue'
 GREEN = 'green'
