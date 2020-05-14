@@ -45,8 +45,7 @@ def shell(reader, writer):
 if __name__ == '__main__':
     kwargs = telnetlib3.parse_server_args()
     kwargs['shell'] = shell
-    # kwargs['host'] = socket.gethostbyname(socket.gethostname())
-    kwargs['host'] = 'shrouded-coast-37500.herokuapp.com'
+    kwargs['host'] = socket.gethostbyname(socket.gethostname())
     kwargs['port'] = 11111
     print(kwargs)
     telnetlib3.run_server(**kwargs)
