@@ -1,1 +1,1 @@
-web: python play_telnet.py
+game: python play_telnet.py

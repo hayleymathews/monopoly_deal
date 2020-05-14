@@ -47,4 +47,5 @@ if __name__ == '__main__':
     kwargs['shell'] = shell
     kwargs['host'] = socket.gethostbyname(socket.gethostname())
     kwargs['port'] = 11111
+    print(kwargs)
     telnetlib3.run_server(**kwargs)
