@@ -17,7 +17,7 @@ num_bots = 0
 
 
 @asyncio.coroutine
-def shell(reader, writer):    
+def shell(reader, writer):   
     writer.iac(WONT, ECHO)
     writer.iac(WONT, SGA)
     writer.write('enter your name: \r\n')
@@ -45,7 +45,8 @@ def shell(reader, writer):
 if __name__ == '__main__':
     kwargs = telnetlib3.parse_server_args()
     kwargs['shell'] = shell
-    kwargs['host'] = socket.gethostbyname(socket.gethostname())
+    # kwargs['host'] = socket.gethostbyname(socket.gethostname())
+    kwargs['host'] = 'shrouded-coast-37500.herokuapp.com'
     kwargs['port'] = 11111
     print(kwargs)
     telnetlib3.run_server(**kwargs)
