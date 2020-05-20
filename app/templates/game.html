@@ -1,0 +1,67 @@
+<html>
+    <head>
+        <title>Monopoly Deal Game: {{ room }}</title>
+        <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            var socket;
+            $(document).ready(function(){
+                socket = io.connect('http://' + document.domain + ':' + location.port + '/game');
+                socket.on('connect', function() {
+                    socket.emit('joined', {}); 
+                });
+
+                // chat functionality
+                socket.on('chat_message', function(data) {
+                    $('#chat').val($('#chat').val() + data.msg + '\n');
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+                $('#text').keypress(function(e) {
+                    var code = e.keyCode || e.which;
+                    if (code == 13) {
+                        text = $('#text').val();
+                        $('#text').val('');
+                        socket.emit('text', {msg: text});
+                    }
+                });
+
+                // game functionality
+                socket.on('status', function(data) {
+                    $('#game').val($('#game').val() + '<' + data.msg + '>\n');
+                    $('#game').scrollTop($('#game')[0].scrollHeight);
+                });
+                socket.on('game_message', function(data) {
+                    $('#game').val($('#game').val() + data.msg + '\n');
+                    $('#game').scrollTop($('#game')[0].scrollHeight);
+                });
+                socket.on('prompt', function(data) {
+                    $('#action').val(data.msg);
+                });
+                $('#action').keypress(function(e) {
+                    var code = e.keyCode || e.which;
+                    if (code == 13) {
+                        action = $('#action').val();
+                        $('#action').val('');
+                        socket.emit('action', {msg: action.split(': ').pop()});
+                    }});
+            });
+            function add_bot() {
+                socket.emit('add_bot', {});
+            }
+            function player_ready() {
+                socket.emit('ready', {});
+            }
+
+
+        </script>
+    </head>
+    <body>
+        <h1>Monopoly Deal Game: {{ room }}</h1>
+        <button onclick="add_bot();">Add Robot Player</button><br><br>
+        <button onclick="player_ready();">Ready</button><br><br>
+        <textarea id="game" cols="100" rows="20"></textarea>
+        <textarea id="chat" cols="40" rows="20"></textarea><br><br>
+        <input id="action" size="100">
+        <input id="text" size="40"><br><br>
+    </body>
+</html>

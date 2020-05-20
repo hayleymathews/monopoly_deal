@@ -1,4 +1,5 @@
 import random
+from app import socketio
 from .cards import action_card
 from .utils import force_sync
 
@@ -124,6 +125,7 @@ class PlayablePlayer(Player):
             message += '\r\t{}    {} \n'.format(i, action)
         message += '\r' + '*' * 100 + '\n'
         self.write(message)
+        # print('written?')
 
         valid_action = False
         while not valid_action:
@@ -213,3 +215,31 @@ class TelNetPlayer(PlayablePlayer):
         self.reader._eof = False
         x = await self.reader.read(10)
         return x
+
+
+class WebPlayer(PlayablePlayer):
+    def __init__(self, name, player_id, socket, response_dict):
+        super(WebPlayer, self).__init__(name)
+        self.player_id = player_id
+        self.socket = socket
+        self.response_dict = response_dict
+
+    def write(self, message):
+        self.socket.emit('game_message', {'msg': message}, room=self.player_id, namespace='/game')
+        self.socket.sleep(0)
+
+    def read(self, prompt=None):
+        if prompt:
+            self.socket.emit('prompt', {'msg': prompt}, room=self.player_id, namespace='/game')
+            self.socket.sleep()
+        import time
+        time.sleep(5)
+        resp = self.response_dict[self.player_id].pop('latest', None)
+        print('SHIT')
+        print(resp)
+        while not resp:
+            time.sleep(1)
+            resp = self.response_dict[self.player_id].pop('latest', None)
+        print('PENIS' * 100)
+        print(resp)
+        return resp

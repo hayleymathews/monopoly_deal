@@ -1,4 +1,5 @@
 from collections import defaultdict
+
 import numpy as np
 
 from .board import Board
@@ -19,7 +20,7 @@ class MonopDealGame(object):
                  players,
                  verbose=False):
         """
-        set up mdg game
+        set up md game
 
         Arguments:
             players {list} -- list of Player instances
@@ -81,6 +82,7 @@ class MonopDealGame(object):
         while actions:
             actions -= 1
             card = player.choose_action(player.hand + self.actions)
+            # TODO: free action to rearrange property sets
             if card == END_TURN:
                 break
             if card == SHOW_BOARD:
@@ -280,7 +282,7 @@ class MonopDealGame(object):
                        amount_owed,
                        payers):
         """
-        collect money from debtors, forceclose their property too maybe
+        collect money from debtors, foreclose their property too maybe
 
         Arguments:
             collector {Player} -- player collecting money
@@ -346,7 +348,8 @@ class MonopDealGame(object):
         """
         return [x for x in self.players if x != player]
 
-    def write_all_players(self, message):
+    def write_all_players(self,
+                          message):
         """
         write a message to all players
 

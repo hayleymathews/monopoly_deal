@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>Monopoly Deal</title>
+    </head>
+    <body>
+        <h1>Monopoly Deal</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.player.label }}: {{ form.player() }} {% for error in form.player.errors %}{{ error }}{% endfor %}<br>
+            {{ form.room.label }}: {{ form.room() }} {% for error in form.room.errors %}{{ error }}{% endfor %}<br>
+            {{ form.submit() }}
+        </form>
+    </body>
+</html>
