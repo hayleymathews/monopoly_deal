@@ -155,7 +155,10 @@ class PlayablePlayer(Player):
             try:
                 discard.append(self.hand.pop(int(discarded_card)))
                 hand_size -= 1
-            except Exception:
+            except Exception as e:
+                print(e.msg)
+                print(discarded_card)
+                print(self.hand)
                 self.write('\rinvalid card #, please try again')
 
         return discard
@@ -242,5 +245,6 @@ class WebPlayer(PlayablePlayer):
         # is it terrible? yes. does it work? occasionally
         resp = self.response_dict[self.player_id].pop('latest', None)
         while not resp:
+            self.socket.sleep()
             resp = self.response_dict[self.player_id].pop('latest', None)
         return resp

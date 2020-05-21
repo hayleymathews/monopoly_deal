@@ -1,6 +1,6 @@
 from collections import defaultdict
 from flask import session, request
-from flask_socketio import emit, join_room, leave_room, close_room
+from flask_socketio import emit, join_room, leave_room, close_room, disconnect
 from .. import socketio
 
 from game.game import MonopDealGame
@@ -70,6 +70,7 @@ def action(message):
     room = session.get('room')
     player_id = request.sid
     RESPONSES[room][player_id]['latest'] = message['msg']
+    socketio.sleep()
 
 
 @socketio.on('text', namespace='/game')
@@ -77,3 +78,12 @@ def text(message):
     room = session.get('room')
     player = session.get('player')
     emit('chat_message', {'msg': player + ':' + message['msg']}, room=room)
+
+
+@socketio.on('disconnect',  namespace='/game')
+def disconnect_client():
+    room = session.get('room')
+    PLAYERS.pop(room, None)
+    ROBOTS.pop(room, None)
+    close_room(room)
+    disconnect()

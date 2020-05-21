@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 socketio = SocketIO()
 
 
-def create_app(debug=False):
+def create_app(debug=True):
     """Create an application."""
     app = Flask(__name__)
     app.debug = debug
@@ -15,5 +15,5 @@ def create_app(debug=False):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    socketio.init_app(app, async_mode="threading")
+    socketio.init_app(app, async_mode="eventlet")
     return app
