@@ -119,13 +119,13 @@ class PlayablePlayer(Player):
         if len(playable_actions) == 1:
             return playable_actions[0]
 
-        message = '\r' + '*' * 100 + '\n'
+        # TODO: this message format is not super great for the web...
+        message = '\r' + '*' * 80 + '\n'
         message += '\r\tActions: \n'
         for i, action in enumerate(playable_actions):
             message += '\r\t{}    {} \n'.format(i, action)
-        message += '\r' + '*' * 100 + '\n'
+        message += '\r' + '*' * 80 + '\n'
         self.write(message)
-        # print('written?')
 
         valid_action = False
         while not valid_action:
@@ -142,11 +142,11 @@ class PlayablePlayer(Player):
         if len(self.hand) <= self.hand_limit:
             return []
 
-        message = '\r' + '*' * 100 + '\n'
+        message = '\r' + '*' * 80 + '\n'
         message += '\r\tHand: \n'
         for i, card in enumerate(self.hand):
             message += '\r\t{}    {}\n'.format(i, card)
-        message += '\r' + '*' * 100 + '\n'
+        message += '\r' + '*' * 80 + '\n'
         self.write(message)
 
         discard, hand_size = [], len(self.hand)
@@ -218,6 +218,10 @@ class TelNetPlayer(PlayablePlayer):
 
 
 class WebPlayer(PlayablePlayer):
+    """
+    web player
+    uses sockets to play over the internet
+    """
     def __init__(self, name, player_id, socket, response_dict):
         super(WebPlayer, self).__init__(name)
         self.player_id = player_id
@@ -232,14 +236,11 @@ class WebPlayer(PlayablePlayer):
         if prompt:
             self.socket.emit('prompt', {'msg': prompt}, room=self.player_id, namespace='/game')
             self.socket.sleep()
-        import time
-        time.sleep(5)
+        # HACK: continuing in the tradition of incredibly lazy implementations
+        # the action event that listens to responses from this prompt
+        # writes to this shared global response dict, and we just read from it here
+        # is it terrible? yes. does it work? occasionally
         resp = self.response_dict[self.player_id].pop('latest', None)
-        print('SHIT')
-        print(resp)
         while not resp:
-            time.sleep(1)
             resp = self.response_dict[self.player_id].pop('latest', None)
-        print('PENIS' * 100)
-        print(resp)
         return resp

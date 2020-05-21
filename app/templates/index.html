@@ -1,14 +1,24 @@
-<html>
-    <head>
-        <title>Monopoly Deal</title>
-    </head>
-    <body>
-        <h1>Monopoly Deal</h1>
-        <form method="POST">
-            {{ form.hidden_tag() }}
-            {{ form.player.label }}: {{ form.player() }} {% for error in form.player.errors %}{{ error }}{% endfor %}<br>
-            {{ form.room.label }}: {{ form.room() }} {% for error in form.room.errors %}{{ error }}{% endfor %}<br>
-            {{ form.submit() }}
-        </form>
-    </body>
-</html>
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block content %}
+
+<div class="container">
+ <div class="row">
+    <h2>Monopoly Deal</h2>
+    <h4>Create or Join Game</h4>
+  </div>
+  <hr>
+  <form action="" method="post" class="form" role="form">
+   {{ form.csrf_token() }}
+   <div class="row">
+    <div class="form-group">
+      {{ wtf.form_field(form.player, type='text', class='form-control', placeholder='player') }}
+      {{ wtf.form_field(form.room, type='text', class='form-control', placeholder='game id') }}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+  <hr>
+</div>
+{% endblock %}
+

@@ -1,18 +1,6 @@
 from flask import session, redirect, url_for, render_template, request
 from . import main
 from .forms import GameForm
-from game.game import MonopDealGame
-
-GAMES = {}
-
-
-def get_game(game_id):
-    try:
-        return GAMES[game_id]
-    except KeyError:
-        game = MonopDealGame([], verbose=True)
-        GAMES[game_id] = game
-        return game
 
 
 @main.route('/', methods=['GET', 'POST'])

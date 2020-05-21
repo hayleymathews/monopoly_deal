@@ -12,7 +12,7 @@ class Board(object):
 
     def show_board(self):
         # TODO: better here
-        board = '\r' + "-" * 100 + '\n'
+        board = '\r' + "-" * 80 + '\n'
         for player in self.players:
             board += "\r{}\n".format(player.name)
             board += "\rBANK value: $" + str(sum(x.value for x in self._banks[player.name])) + "\n"
@@ -25,7 +25,7 @@ class Board(object):
                     board += "\r  " + "************ \n"
                 for prop in props:
                     board += "\r    " + str(prop) + "\n"
-        board += '\r' + "-" * 100 + '\n'
+        board += '\r' + "-" * 80 + '\n'
         return board
 
     def properties(self, player):
