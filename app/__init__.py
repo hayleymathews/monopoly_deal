@@ -5,11 +5,11 @@ from flask_bootstrap import Bootstrap
 socketio = SocketIO()
 
 
-def create_app(debug=True):
+def create_app(debug=False):
     """Create an application."""
     app = Flask(__name__)
     app.debug = debug
-    app.config['SECRET_KEY'] = 'gjr39dkjn344_!67#'
+    app.config['SECRET_KEY'] = 'gjr39dkjndDWD344_!67#'
     bootstrap = Bootstrap(app)
 
     from .main import main as main_blueprint

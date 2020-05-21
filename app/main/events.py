@@ -23,7 +23,7 @@ def add_player(game_id, player_id, player_name, bot=False):
 
 def get_bot_name(game_id):
     bot_number = ROBOTS[game_id]
-    bot_name = 'bot {}'.format(bot_number)
+    bot_name = 'bot {}'.format(bot_number + 1)
     ROBOTS[game_id] += 1
     return bot_name
 
@@ -56,6 +56,8 @@ def start_game(message):
 
     emit('status', {'msg': '{} has won the game'.format(winner)}, room=room)
 
+    PLAYERS.pop(room, None)
+    ROBOTS.pop(room, None)
     close_room(room)
 
 
