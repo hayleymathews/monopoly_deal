@@ -13,9 +13,13 @@
    <div class="row">
     <div class="form-group">
       {{ wtf.form_field(form.player, type='text', class='form-control', placeholder='player') }}
-      {{ wtf.form_field(form.room, type='text', class='form-control', placeholder='game id') }}
+      <button type="submit" class="btn btn-primary">Create</button>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <hr>
+    <div class="form-group">
+      {{ wtf.form_field(form.room, type='text', class='form-control', placeholder='game id') }}
+      <button type="submit" class="btn btn-primary">Join</button>
+    </div>
     </div>
   </form>
   <hr>

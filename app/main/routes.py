@@ -1,3 +1,4 @@
+import uuid
 from flask import session, redirect, url_for, render_template, request
 from . import main
 from .forms import GameForm
@@ -8,7 +9,7 @@ def index():
     form = GameForm()
     if form.validate_on_submit():
         session['player'] = form.player.data
-        session['room'] = form.room.data
+        session['room'] = form.room.data or uuid.uuid4()
         session['chat_room'] = form.room.data + '_chat'
         return redirect(url_for('.game'))
     elif request.method == 'GET':
