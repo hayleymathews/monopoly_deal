@@ -87,7 +87,7 @@ class MonopDealGame(object):
                 break
             if card == SHOW_BOARD:
                 # TODO: this is hacky and gross but to make terminal play easier
-                player.write(self.board.show_board(), channel='update_board')
+                player.write(self.board.show_board(), 'update_board')
             elif card == REARRANGE_PROPS:
                 wildcard_props = self.board.get_wildcard_properties(player)
                 [self._lay_property(player, prop) for prop in wildcard_props]
