@@ -9,7 +9,7 @@ def index():
     form = GameForm()
     if form.validate_on_submit():
         session['player'] = form.player.data
-        session['room'] = form.room.data if form.join.data else uuid.uuid4()
+        session['room'] = form.room.data if form.join.data else str(uuid.uuid4())
         session['chat_room'] = form.room.data + '_chat'
         return redirect(url_for('.game'))
     elif request.method == 'GET':
