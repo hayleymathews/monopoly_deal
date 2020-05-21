@@ -83,6 +83,8 @@ class MonopDealGame(object):
 
         while actions:
             card = player.choose_action(player.hand + self.free_actions)
+            if self.verbose:
+                self.write_all_players("\r{} played {}\n\r".format(player.name, card))
             if card == END_TURN:
                 break
             if card == SHOW_BOARD:
@@ -93,8 +95,6 @@ class MonopDealGame(object):
                 [self._lay_property(player, prop) for prop in wildcard_props]
             else:
                 actions -= 1
-                if self.verbose:
-                    self.write_all_players("\r{} played {}\n\r".format(player.name, card))
                 player.hand.remove(card)
                 self._card_map[type(card)](player, card)
 
