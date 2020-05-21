@@ -26,12 +26,15 @@ class Player(object):
         """
         self.hand.extend(deck.draw_cards(count))
 
-    def write(self, message):
+    def write(self, message, _channel=None):
         """
         write message to player
 
         Arguments:
             message {str} -- message to send
+
+        Keyword Arguments:
+            write_all {str} -- channel to send message to (default: {None})
         """
         raise NotImplementedError
 
@@ -84,7 +87,7 @@ class RandomPlayer(Player):
     randomized player
     dumbly picks actions at random
     """
-    def write(self, message):
+    def write(self, message, _channel=None):
         # dont need i/o for bot
         pass
 
@@ -153,12 +156,9 @@ class PlayablePlayer(Player):
         while hand_size > self.hand_limit:
             discarded_card = self.read('\renter card # to discard: ')
             try:
-                discard.append(self.hand.pop(int(discarded_card)))
+                discard.append(self.hand.pop(int(discarded_card) - 1))
                 hand_size -= 1
-            except Exception as e:
-                print(e.msg)
-                print(discarded_card)
-                print(self.hand)
+            except Exception:
                 self.write('\rinvalid card #, please try again')
 
         return discard
@@ -187,7 +187,7 @@ class TerminalPlayer(PlayablePlayer):
     terminal player
     can play locally
     """
-    def write(self, message):
+    def write(self, message, write_all=False):
         print(message)
 
     def read(self, prompt=None):
@@ -204,7 +204,7 @@ class TelNetPlayer(PlayablePlayer):
         self.writer = writer
         self.reader = reader
 
-    def write(self, message):
+    def write(self, message, _channel=None):
         self.writer.write(message)
 
     def read(self, prompt=None):
@@ -231,8 +231,8 @@ class WebPlayer(PlayablePlayer):
         self.socket = socket
         self.response_dict = response_dict
 
-    def write(self, message):
-        self.socket.emit('game_message', {'msg': message}, room=self.player_id, namespace='/game')
+    def write(self, message, channel='player_message'):
+        self.socket.emit(channel, {'msg': message}, room=self.player_id, namespace='/game')
         self.socket.sleep(0)
 
     def read(self, prompt=None):
@@ -247,4 +247,5 @@ class WebPlayer(PlayablePlayer):
         while not resp:
             self.socket.sleep()
             resp = self.response_dict[self.player_id].pop('latest', None)
+        self.socket.emit('end_input', {'msg': ''}, room=self.player_id, namespace='/game')
         return resp

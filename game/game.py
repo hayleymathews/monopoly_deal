@@ -3,7 +3,7 @@ from collections import defaultdict
 import numpy as np
 
 from .board import Board
-from .cards import (CARDS, END_TURN, SHOW_BOARD, action_card, money_card,
+from .cards import (CARDS, END_TURN, SHOW_BOARD, REARRANGE_PROPS, action_card, money_card,
                     property_card, rent_card)
 from .deck import Deck
 from .utils import (cached_property, check_full_set, get_rent, pay_from_bank,
@@ -33,7 +33,9 @@ class MonopDealGame(object):
         self.rent_level = 1  # TODO: sloppy
         self.deck = Deck(CARDS)
         self.board = Board(players)
-        self.actions = [END_TURN, SHOW_BOARD] if verbose else [END_TURN]
+        self.free_actions = [REARRANGE_PROPS, END_TURN]
+        if verbose:
+            self.free_actions.append(SHOW_BOARD)
         [player.draw_cards(self.deck, 5) for player in self.players]
 
     def play_game(self):
@@ -80,16 +82,17 @@ class MonopDealGame(object):
         player.draw_cards(self.deck, 2)
 
         while actions:
-            actions -= 1
-            card = player.choose_action(player.hand + self.actions)
-            # TODO: free action to rearrange property sets
+            card = player.choose_action(player.hand + self.free_actions)
             if card == END_TURN:
                 break
             if card == SHOW_BOARD:
                 # TODO: this is hacky and gross but to make terminal play easier
-                actions += 1
-                player.write(self.board.show_board())
+                player.write(self.board.show_board(), channel='update_board')
+            elif card == REARRANGE_PROPS:
+                wildcard_props = self.board.get_wildcard_properties(player)
+                [self._lay_property(player, prop) for prop in wildcard_props]
             else:
+                actions -= 1
                 if self.verbose:
                     self.write_all_players("\r{} played {}\n\r".format(player.name, card))
                 player.hand.remove(card)
@@ -97,7 +100,7 @@ class MonopDealGame(object):
 
         self.deck.discard_cards(player.discard_cards())
         if self.verbose:
-            self.write_all_players(self.board.show_board())
+            self.write_all_players(self.board.show_board(), board=True)
 
     def _check_win_condition(self):
         """
@@ -349,12 +352,17 @@ class MonopDealGame(object):
         return [x for x in self.players if x != player]
 
     def write_all_players(self,
-                          message):
+                          message,
+                          board=False):
         """
         write a message to all players
 
         Arguments:
             message {str} -- message to send
+
+         Keyword Arguments:
+            board {bool} -- is message current board state (default: {False})
         """
+        channel = 'update_board' if board else 'game_message'
         for player in self.players:
-            player.write(message)
+            player.write(message, channel)

@@ -2,6 +2,7 @@ from collections import namedtuple
 
 END_TURN = 'end turn'
 SHOW_BOARD = 'show board'
+REARRANGE_PROPS = 'rearrange properties'
 
 BROWN = 'brown'
 DARK_BLUE = 'dark blue'

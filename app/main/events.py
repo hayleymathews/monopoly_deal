@@ -28,22 +28,32 @@ def get_bot_name(game_id):
     return bot_name
 
 
+def get_players(game_id):
+    return [player.name for player in PLAYERS[game_id].values()]
+
+
 @socketio.on('joined', namespace='/game')
-def joined(message):
+def joined(_message):
     room = session.get('room')
-    player = session.get('player')
+    player_name = session.get('player')
     player_id = request.sid
-    add_player(room, player_id, player)
+
+    add_player(room, player_id, player_name)
     join_room(room)
-    emit('status', {'msg': session.get('player') + ' has entered the room.'}, room=room)
+
+    message = '{} has entered the game.\nall participants: {}'.format(player_name, ', '.join(get_players(room)))
+    emit('status', {'msg': message}, room=room)
 
 
 @socketio.on('add_bot', namespace='/game')
-def add_bot_player(message):
+def add_bot_player(_message):
     room = session.get('room')
     bot_name = get_bot_name(room)
-    add_player(room, 'x', bot_name, bot=True)
-    emit('status', {'msg': '{} has entered the room.'.format(bot_name)}, room=room)
+
+    add_player(room, bot_name, bot_name, bot=True)
+
+    message = '{} has entered the game.\nall participants: {}'.format(bot_name, ', '.join(get_players(room)))
+    emit('status', {'msg': message}, room=room)
 
 
 @socketio.on('start', namespace='/game')
@@ -70,6 +80,7 @@ def action(message):
     room = session.get('room')
     player_id = request.sid
     RESPONSES[room][player_id]['latest'] = message['msg']
+    # NOTE: have to sleep here for a second so that the player object can read the message
     socketio.sleep()
 
 
@@ -77,7 +88,7 @@ def action(message):
 def text(message):
     room = session.get('room')
     player = session.get('player')
-    emit('chat_message', {'msg': player + ':' + message['msg']}, room=room)
+    emit('chat_message', {'msg': '<{}>: {}'.format(player, message['msg'])}, room=room)
 
 
 @socketio.on('disconnect',  namespace='/game')

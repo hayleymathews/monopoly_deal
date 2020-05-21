@@ -4,6 +4,7 @@
         <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="game.css">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
         <script type="text/javascript" charset="utf-8">
             var protocol = window.location.protocol;
@@ -30,15 +31,26 @@
 
                 // game functionality
                 socket.on('status', function(data) {
-                    $('#game').val($('#game').val() + '<' + data.msg + '>\n');
-                    $('#game').scrollTop($('#game')[0].scrollHeight);
+                    $('#game_log').val($('#game_log').val() + data.msg + '\n');
+                    $('#game_log').scrollTop($('#game_log')[0].scrollHeight);
+                });
+                socket.on('update_board', function(data) {
+                    $('#board').val(data.msg);
                 });
                 socket.on('game_message', function(data) {
-                    $('#game').val($('#game').val() + data.msg + '\n');
-                    $('#game').scrollTop($('#game')[0].scrollHeight);
+                    $('#game_log').val($('#game_log').val() + data.msg + '\n');
+                    $('#game_log').scrollTop($('#game_log')[0].scrollHeight);
+                });
+                socket.on('player_message', function(data) {
+                    $('#player_log').val($('#player_log').val() + data.msg + '\n');
+                    $('#player_log').scrollTop($('#player_log')[0].scrollHeight);
+                });
+                socket.on('end_input', function(data) {
+                    $('#action').attr( "disabled", true);
                 });
                 socket.on('prompt', function(data) {
-                    $('#game_input').text(data.msg);
+                    $('#player_input').text(data.msg);
+                    $('#action').attr( "disabled", false);
                 });
                 $('#action').keypress(function(e) {
                     var code = e.keyCode || e.which;
@@ -59,7 +71,7 @@
         </script>
     </head>
     <body>
-        <div class="container">
+        <div class="container-fluid m-3">
             <div class="row">
                 <h2>Monopoly Deal Game: {{ room }}</h2>
             </div>
@@ -74,19 +86,25 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-8">
+                <div class="col-5">
+                    <h4>Board</h4>
+                    <textarea class="form-control" id="board" cols="100" rows="25" readonly></textarea>
+                </div>
+                <div class="col-4">
                     <h4>Game Log</h4>
-                    <textarea class="form-control" id="game" cols="100" rows="25" readonly></textarea>
+                    <textarea class="form-control" id="game_log" cols="100" rows="8" readonly></textarea>
+                    <h4>Player Inputs</h4>
+                    <textarea class="form-control" id="player_log" cols="100" rows="14" readonly></textarea>
                     <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="game_input">Game Input</span>
+                            <span class="input-group-text" id="player_input">Game Input</span>
                         </div>
                         <input id="action" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-2">
                     <h4>Chat Log</h4>
-                    <textarea class="form-control" id="chat" cols="40" rows="25" readonly></textarea>
+                    <textarea class="form-control" id="chat" cols="30" rows="24" readonly></textarea>
                     <div class="input-group input-group-sm mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="chat_input">Chat Input</span>

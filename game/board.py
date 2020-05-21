@@ -66,3 +66,23 @@ class Board(object):
                 for prop_set, properties in self.properties(player).items()
                 if not check_full_set(prop_set, properties)
                 for prop in properties]
+
+    def get_wildcard_properties(self,
+                                player):
+        """
+        get wildcard properties for a player
+
+        Arguments:
+            player {Player} -- player to get props for
+
+        Returns:
+            list -- list of wildcards
+        """
+        wildcards = []
+        # FIXME: this is terrible, remember how to write decent python
+        for properties in self.properties(player).values():
+            for prop in properties:
+                if len(prop.colors) > 1:
+                    wildcards.append(prop)
+                    properties.remove(prop)
+        return wildcards
