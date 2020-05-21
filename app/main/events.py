@@ -49,6 +49,10 @@ def add_bot_player(message):
 @socketio.on('start', namespace='/game')
 def start_game(message):
     room = session.get('room')
+    if len(PLAYERS[room]) < 2:
+        emit('status', {'msg': 'not enough players to begin'}, room=room)
+        return
+
     emit('status', {'msg': 'begin game'}, room=room)
 
     mdg = MonopDealGame(PLAYERS[room].values(), verbose=True)
