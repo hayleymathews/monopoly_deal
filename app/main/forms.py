@@ -6,4 +6,5 @@ from wtforms.validators import Required
 class GameForm(Form):
     player = StringField('Name', validators=[Required()])
     room = StringField('Game ID')
-    submit = SubmitField('Enter Game')
+    create = SubmitField('Create Game')
+    join = SubmitField('Join Game')

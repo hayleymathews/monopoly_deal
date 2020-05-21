@@ -13,12 +13,12 @@
    <div class="row">
     <div class="form-group">
       {{ wtf.form_field(form.player, type='text', class='form-control', placeholder='player') }}
-      <button type="submit" class="btn btn-primary">Create</button>
+       {{ wtf.form_field(form.create, button_map={'submit':'success'}) }}
     </div>
     <hr>
     <div class="form-group">
       {{ wtf.form_field(form.room, type='text', class='form-control', placeholder='game id') }}
-      <button type="submit" class="btn btn-primary">Join</button>
+      {{ wtf.form_field(form.join, button_map={'submit':'success'}) }}
     </div>
     </div>
   </form>
