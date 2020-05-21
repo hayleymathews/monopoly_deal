@@ -19,5 +19,8 @@ remote players join by
 telnet {host} {port}
 ```  
 
+**to play on the web:**   
+go [here](https://shrouded-coast-37500.herokuapp.com/)  
+
 
 *ymmv on classic
