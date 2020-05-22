@@ -50,8 +50,7 @@ class MonopDealGame(object):
         while not winner and rounds < 1000:
             winner = self.play_round()
             rounds += 1
-        if self.verbose:
-            self.write_all_players('\rWinner: {} in {} rounds\n'.format(winner.name, rounds))
+        self._write_players('\rWinner: {} in {} rounds\n'.format(winner.name, rounds))
         return winner
 
     def play_round(self):
@@ -83,24 +82,22 @@ class MonopDealGame(object):
 
         while actions:
             card = player.choose_action(player.hand + self.free_actions)
-            if self.verbose:
-                self.write_all_players("\r{} played {}\n\r".format(player.name, card))
+            self._write_players("\r{} played {}\n\r".format(player.name, card))
+
             if card == END_TURN:
                 break
-            if card == SHOW_BOARD:
-                # TODO: this is hacky and gross but to make terminal play easier
-                player.write(self.board.show_board(), 'update_board')
+            elif card == SHOW_BOARD:
+                self._write_players(self.board.show_board(), [player], board=True)
             elif card == REARRANGE_PROPS:
-                wildcard_props = self.board.get_wildcard_properties(player)
-                [self._lay_property(player, prop) for prop in wildcard_props]
+                self._rearrange_properties(player)
+
             else:
                 actions -= 1
                 player.hand.remove(card)
                 self._card_map[type(card)](player, card)
 
         self.deck.discard_cards(player.discard_cards())
-        if self.verbose:
-            self.write_all_players(self.board.show_board(), board=True)
+        self._write_players(self.board.show_board(), board=True)
 
     def _check_win_condition(self):
         """
@@ -179,7 +176,7 @@ class MonopDealGame(object):
         if not rent:
             return
 
-        other_players = self.other_players(player)
+        other_players = self._other_players(player)
         collect_from = other_players if card.players == 'ALL' else [player.choose_action(other_players)]
         self._collect_money(player, rent, collect_from)
 
@@ -191,12 +188,12 @@ class MonopDealGame(object):
     def _do_action(self, player, card):
         # TODO: clean up ugly long if
         if card.action == 'debt collector':
-            collect_from = [player.choose_action(self.other_players(player))]
+            collect_from = [player.choose_action(self._other_players(player))]
             self._collect_money(player, 5000000, collect_from)
         elif card.action == 'double the rent':
             self.rent_level *= 2
         elif card.action == 'it\'s my birthday':
-            collect_from = self.other_players(player)
+            collect_from = self._other_players(player)
             self._collect_money(player, 2000000, collect_from)
         elif card.action == 'pass go':
             player.draw_cards(self.deck, 2)
@@ -246,7 +243,7 @@ class MonopDealGame(object):
             full_sets {bool} -- if True, player can take full property sets from opponents (default: {False})
             swap {bool} -- if True, player must give up a property of their own in trade (default: {False})
         """
-        other_players = self.other_players(player)
+        other_players = self._other_players(player)
         sets = self.board.get_property_sets(other_players, full_sets=full_sets)
         if not sets:
             # nothing to steal
@@ -265,8 +262,7 @@ class MonopDealGame(object):
             self.deck.discard_cards([say_no_card])
             return
 
-        if self.verbose:
-            self.write_all_players('\r{} stealing {} from {}\n'.format(player.name, str(properties), victim.name))
+        self._write_players('\r{} stealing {} from {}\n'.format(player.name, str(properties), victim.name))
 
         # take properties from victim and give them to player
         [self._lay_property(player, prop) for prop in properties]
@@ -277,8 +273,7 @@ class MonopDealGame(object):
             _, swap_set, swap_props = player.choose_action(player_sets)
             self.board.reset_properties(player, swap_set, swap_props)
             [self._lay_property(victim, prop) for prop in swap_props]
-            if self.verbose:
-                self.write_all_players('\r{} giving {} to {}\n'.format(player.name, str(swap_props), victim.name))
+            self._write_players('\r{} giving {} to {}\n'.format(player.name, str(swap_props), victim.name))
 
     def _collect_money(self,
                        collector,
@@ -292,8 +287,7 @@ class MonopDealGame(object):
             amount_owed {int} -- amount of money owed
             payers {list} -- list of Players owing money
         """
-        if self.verbose:
-            self.write_all_players('\r{} collecting {} from {}\n'.format(collector.name, amount_owed, str([x.name for x in payers])))
+        self._write_players('\r{} collecting {} from {}\n'.format(collector.name, amount_owed, str([x.name for x in payers])))
 
         for payer in payers:
             say_no_card = payer.say_no()
@@ -338,8 +332,8 @@ class MonopDealGame(object):
 
         return bank_payment.paid, property_payment.paid
 
-    def other_players(self,
-                      player):
+    def _other_players(self,
+                       player):
         """
         get the other folks in the game
 
@@ -351,9 +345,10 @@ class MonopDealGame(object):
         """
         return [x for x in self.players if x != player]
 
-    def write_all_players(self,
-                          message,
-                          board=False):
+    def _write_players(self,
+                       message,
+                       players=None,
+                       board=False):
         """
         write a message to all players
 
@@ -361,8 +356,23 @@ class MonopDealGame(object):
             message {str} -- message to send
 
          Keyword Arguments:
+            players {list} - list of players to write to, if None sends to all (default: {None})
             board {bool} -- is message current board state (default: {False})
         """
+        if not self.verbose:
+            return
+        players = players or self.players
         channel = 'update_board' if board else 'game_message'
-        for player in self.players:
+        for player in players:
             player.write(message, channel)
+
+    def _rearrange_properties(self,
+                              player):
+        """
+        rearrange wildcard properties on a players board
+
+        Arguments:
+            player {Player} -- player rearranging
+        """
+        wildcard_props = self.board.get_wildcard_properties(player)
+        [self._lay_property(player, prop) for prop in wildcard_props]

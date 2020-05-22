@@ -225,11 +225,11 @@ class WebPlayer(PlayablePlayer):
     web player
     uses sockets to play over the internet
     """
-    def __init__(self, name, player_id, socket, response_dict):
+    def __init__(self, name, player_id, socket, responses):
         super(WebPlayer, self).__init__(name)
         self.player_id = player_id
         self.socket = socket
-        self.response_dict = response_dict
+        self.responses = responses
 
     def write(self, message, channel='player_message'):
         self.socket.emit(channel, {'msg': message}, room=self.player_id, namespace='/game')
@@ -243,9 +243,10 @@ class WebPlayer(PlayablePlayer):
         # the action event that listens to responses from this prompt
         # writes to this shared global response dict, and we just read from it here
         # is it terrible? yes. does it work? occasionally
-        resp = self.response_dict[self.player_id].pop('latest', None)
+        resp = self.responses[self.player_id].pop('latest', None)
         while not resp:
             self.socket.sleep()
-            resp = self.response_dict[self.player_id].pop('latest', None)
+            resp = self.responses[self.player_id].pop('latest', None)
+        # send a signal to client to stop allowing input for this player
         self.socket.emit('end_input', {'msg': ''}, room=self.player_id, namespace='/game')
         return resp
