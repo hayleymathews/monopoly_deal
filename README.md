@@ -20,7 +20,7 @@ telnet {host} {port}
 ```  
 
 **to play on the web:**   
-go [here](https://shrouded-coast-37500.herokuapp.com/)  
+go [here](https://monop-deal.herokuapp.com/)  
 
 
 *ymmv on classic
