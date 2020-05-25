@@ -44,6 +44,9 @@ def joined(_message):
     message = '{} has entered the game.\nall participants: {}'.format(player_name, ', '.join(get_players(room)))
     emit('status', {'msg': message}, room=room)
 
+    if len(PLAYERS[room]) >= 2:
+        emit('game_ready', {'msg': ''}, room=room)
+
 
 @socketio.on('add_bot', namespace='/game')
 def add_bot_player(_message):
@@ -55,14 +58,13 @@ def add_bot_player(_message):
     message = '{} has entered the game.\nall participants: {}'.format(bot_name, ', '.join(get_players(room)))
     emit('status', {'msg': message}, room=room)
 
+    if len(PLAYERS[room]) >= 2:
+        emit('game_ready', {'msg': ''}, room=room)
+
 
 @socketio.on('start', namespace='/game')
 def start_game(message):
     room = session.get('room')
-    if len(PLAYERS[room]) < 2:
-        emit('status', {'msg': 'not enough players to begin'}, room=room)
-        return
-
     emit('status', {'msg': 'begin game'}, room=room)
 
     mdg = MonopDealGame(PLAYERS[room].values(), verbose=True)
@@ -89,7 +91,6 @@ def text(message):
     room = session.get('room')
     player = session.get('player')
     emit('chat_message', {'msg': '<{}>: {}'.format(player, message['msg'])}, room=room)
-
 
 @socketio.on('disconnect',  namespace='/game')
 def disconnect_client():

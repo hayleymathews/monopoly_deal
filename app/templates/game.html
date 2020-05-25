@@ -31,6 +31,9 @@
                 });
 
                 // game functionality
+                socket.on('game_ready', function(data) {
+                    $('#start_game').attr( "disabled", false);
+                });
                 socket.on('status', function(data) {
                     $('#game_log').val($('#game_log').val() + data.msg + '\n');
                     $('#game_log').scrollTop($('#game_log')[0].scrollHeight);
@@ -80,7 +83,7 @@
             <div class="row">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                     <div class="btn-group mr-2" role="group" aria-label="First group">
-                        <button id="start_game" onclick="start_game();" class="btn btn-primary mb-2">Start Game</button>
+                        <button id="start_game" onclick="start_game();" class="btn btn-success mb-2" disabled>Start Game</button>
                     </div>
                     <div class="btn-group mr-2" role="group" aria-label="Second group">
                         <button id="add_bots" onclick="add_bot();" class="btn btn-primary mb-2">Add Robot Player</button>
