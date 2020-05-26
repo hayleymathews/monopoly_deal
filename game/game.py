@@ -259,6 +259,7 @@ class MonopDealGame(object):
         # give victim a chance to defend their property
         say_no_card = victim.say_no()
         if say_no_card:
+            self._write_players('\r{} said no\n'.format(victim.name))
             self.deck.discard_cards([say_no_card])
             return
 
@@ -292,6 +293,7 @@ class MonopDealGame(object):
         for payer in payers:
             say_no_card = payer.say_no()
             if say_no_card:  # debt forgiveness!
+                self._write_players('\r{} said no\n'.format(payer.name))
                 self.deck.discard_cards([say_no_card])
                 continue
 

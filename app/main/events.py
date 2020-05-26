@@ -6,6 +6,7 @@ from .. import socketio
 from game.game import MonopDealGame
 from game.player import RandomPlayer, WebPlayer
 
+GAMES = {}
 ROBOTS = defaultdict(int)
 PLAYERS = defaultdict(dict)
 RESPONSES = defaultdict(dict)
@@ -65,8 +66,14 @@ def add_bot_player(_message):
 @socketio.on('start', namespace='/game')
 def start_game(message):
     room = session.get('room')
-    emit('status', {'msg': 'begin game'}, room=room)
+    if GAMES.get(room):
+        # lol concurrency bug
+        emit('status', {'msg': 'game has already been started'}, room=room)
+        return
 
+    emit('game_started', {'msg': 'begin game'}, room=room)
+
+    GAMES[room] = True
     mdg = MonopDealGame(PLAYERS[room].values(), verbose=True)
     winner = mdg.play_game()
 
@@ -74,6 +81,7 @@ def start_game(message):
 
     PLAYERS.pop(room, None)
     ROBOTS.pop(room, None)
+    GAMES.pop(room, None)
     close_room(room)
 
 
@@ -91,6 +99,7 @@ def text(message):
     room = session.get('room')
     player = session.get('player')
     emit('chat_message', {'msg': '<{}>: {}'.format(player, message['msg'])}, room=room)
+
 
 @socketio.on('disconnect',  namespace='/game')
 def disconnect_client():
