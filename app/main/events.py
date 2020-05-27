@@ -106,5 +106,6 @@ def disconnect_client():
     room = session.get('room')
     PLAYERS.pop(room, None)
     ROBOTS.pop(room, None)
+    GAMES.pop(room, None)
     close_room(room)
     disconnect()

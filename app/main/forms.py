@@ -1,9 +1,9 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import Required
 
 
-class GameForm(Form):
+class GameForm(FlaskForm):
     player = StringField('Name', validators=[Required()])
     room = StringField('Game ID')
     create = SubmitField('Create Game')
