@@ -129,11 +129,8 @@ class PlayablePlayer(Player):
         # TODO: sloppy af
         message = '\r' + '*' * 80 + '\n'
         message += '\rActions: \n'
-        for i, action in enumerate(playable_actions[:-3]):
+        for i, action in enumerate(playable_actions):
             message += '\r\t{}    {} \n'.format(i, action)
-        message += '\rFree Actions: \n'
-        for x, action in enumerate(playable_actions[-3:]):
-            message += '\r\t{}    {} \n'.format(i + x + 1, action)
         message += '\r' + '*' * 80 + '\n'
         self.write(message)
 
