@@ -79,8 +79,7 @@ class MonopDealGame(object):
         player.draw_cards(self.deck, 2)
 
         while actions:
-            cards = player.hand + self.free_actions if player.playable else player.hand
-            card = player.choose_action(cards)
+            card = player.choose_action(player.hand + self.free_actions)
 
             self._write_players("\r{} played {}\n\r".format(player.name, card))
 
