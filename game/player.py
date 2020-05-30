@@ -87,6 +87,8 @@ class RandomPlayer(Player):
     randomized player
     dumbly picks actions at random
     """
+    playable = False
+
     def write(self, message, _channel=None):
         # dont need i/o for bot
         pass
@@ -117,16 +119,21 @@ class RandomPlayer(Player):
 
 
 class PlayablePlayer(Player):
+    playable = True
+
     def choose_action(self, actions):
         playable_actions = self._playable_actions(actions)
         if len(playable_actions) == 1:
             return playable_actions[0]
 
-        # TODO: this message format is not super great for the web...
+        # TODO: sloppy af
         message = '\r' + '*' * 80 + '\n'
-        message += '\r\tActions: \n'
-        for i, action in enumerate(playable_actions):
+        message += '\rActions: \n'
+        for i, action in enumerate(playable_actions[:-3]):
             message += '\r\t{}    {} \n'.format(i, action)
+        message += '\rFree Actions: \n'
+        for x, action in enumerate(playable_actions[-3:]):
+            message += '\r\t{}    {} \n'.format(i + x + 1, action)
         message += '\r' + '*' * 80 + '\n'
         self.write(message)
 

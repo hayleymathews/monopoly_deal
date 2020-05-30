@@ -33,9 +33,7 @@ class MonopDealGame(object):
         self.rent_level = 1  # TODO: sloppy
         self.deck = Deck(CARDS)
         self.board = Board(players)
-        self.free_actions = [REARRANGE_PROPS, END_TURN]
-        if verbose:
-            self.free_actions.append(SHOW_BOARD)
+        self.free_actions = [REARRANGE_PROPS, SHOW_BOARD, END_TURN]
         [player.draw_cards(self.deck, 5) for player in self.players]
 
     def play_game(self):
@@ -81,7 +79,9 @@ class MonopDealGame(object):
         player.draw_cards(self.deck, 2)
 
         while actions:
-            card = player.choose_action(player.hand + self.free_actions)
+            cards = player.hand + self.free_actions if player.playable else player.hand
+            card = player.choose_action(cards)
+
             self._write_players("\r{} played {}\n\r".format(player.name, card))
 
             if card == END_TURN:
