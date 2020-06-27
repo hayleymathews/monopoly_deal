@@ -78,7 +78,12 @@ class MonopDealGame(object):
         self.rent_level, actions = 1, 3
         player.draw_cards(self.deck, 2)
 
+        # if player has no cards at begninning of turn they draw 5 instead of 3
+        if len(player.hand) == 2:
+            player.draw_cards(self.deck, 3)
+
         while actions:
+            # TODO: add ability for player to play cards into bank
             card = player.choose_action(player.hand + self.free_actions)
 
             self._write_players("\r{} played {}\n\r".format(player.name, card))
@@ -180,6 +185,7 @@ class MonopDealGame(object):
         self._collect_money(player, rent, collect_from)
 
         self.deck.discard_cards([card])
+        self.rent_level = 1
 
     #
     # Action Options
@@ -291,6 +297,7 @@ class MonopDealGame(object):
 
         for payer in payers:
             say_no_card = payer.say_no()
+            # TODO: say no cards can be said no to by the original player and then the payer can say no etc etc
             if say_no_card:  # debt forgiveness!
                 self._write_players('\r{} said no\n'.format(payer.name))
                 self.deck.discard_cards([say_no_card])
@@ -317,6 +324,9 @@ class MonopDealGame(object):
         Returns:
             tuple -- ([money cards paid], [property cards paid])
         """
+        # TODO: allow players to pay with any cards in bank or property
+        # its not a rule that they have to exhaust the bank first
+
         # try to pay debt off using money in the bank first
         bank_payment = pay_from_bank(amount, self.board.bank(player))
         self.board.reset_bank(player, bank_payment.remaining)
@@ -325,7 +335,6 @@ class MonopDealGame(object):
             return bank_payment.paid, []
 
         # foreclosure time, start taking properties if you still owe money
-        # TODO: allow players to pick which properties they want to give up
         property_payment = pay_from_properties(bank_payment.owed, self.board.properties(player))
 
         self.board.reset_properties(player)

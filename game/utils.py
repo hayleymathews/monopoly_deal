@@ -144,6 +144,8 @@ def check_full_set(property_set,
     Returns:
         bool
     """
+    # TODO: apparently multi sets are legal: ie 4 browns = 2 full sets
+    # not sure if i like this rule enough to implement
     return len(properties) >= len(RENTS[property_set])
 
 

@@ -184,6 +184,9 @@ class PlayablePlayer(Player):
             return say_no_card
 
         return False
+    
+    def pay(self, bank, properties):
+        pass
 
 
 class TerminalPlayer(PlayablePlayer):
