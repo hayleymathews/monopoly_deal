@@ -10,6 +10,7 @@ GAMES = {}
 ROBOTS = defaultdict(int)
 PLAYERS = defaultdict(dict)
 RESPONSES = defaultdict(dict)
+NAMESPACE = '/game'
 
 
 # TODO: utils shit
@@ -17,7 +18,7 @@ def add_player(game_id, player_id, player_name, bot=False):
     RESPONSES[game_id][player_id] = {}
     resp_dict = RESPONSES[game_id]
     if not bot:
-        PLAYERS[game_id][player_id] = WebPlayer(player_name, player_id, socketio, resp_dict)
+        PLAYERS[game_id][player_id] = WebPlayer(player_name, player_id, socketio, NAMESPACE, resp_dict)
     else:
         PLAYERS[game_id][player_id] = RandomPlayer(player_name)
 
@@ -33,8 +34,8 @@ def get_players(game_id):
     return [player.name for player in PLAYERS[game_id].values()]
 
 
-@socketio.on('joined', namespace='/game')
-def joined(_message):
+@socketio.on('join_game', namespace=NAMESPACE)
+def join_game(_message):
     room = session.get('room')
     player_name = session.get('player')
     player_id = request.sid
@@ -49,7 +50,7 @@ def joined(_message):
         emit('game_ready', {'msg': ''}, room=room)
 
 
-@socketio.on('add_bot', namespace='/game')
+@socketio.on('add_bot', namespace=NAMESPACE)
 def add_bot_player(_message):
     room = session.get('room')
     bot_name = get_bot_name(room)
@@ -63,7 +64,7 @@ def add_bot_player(_message):
         emit('game_ready', {'msg': ''}, room=room)
 
 
-@socketio.on('start', namespace='/game')
+@socketio.on('start', namespace=NAMESPACE)
 def start_game(message):
     room = session.get('room')
     if GAMES.get(room):
@@ -79,14 +80,12 @@ def start_game(message):
 
     emit('status', {'msg': '{} has won the game'.format(winner)}, room=room)
 
-    PLAYERS.pop(room, None)
-    ROBOTS.pop(room, None)
     GAMES.pop(room, None)
-    close_room(room)
+    emit('game_end', {'msg': ''}, room=room)
 
 
-@socketio.on('action', namespace='/game')
-def action(message):
+@socketio.on('action', namespace=NAMESPACE)
+def take_action(message):
     room = session.get('room')
     player_id = request.sid
     RESPONSES[room][player_id]['latest'] = message['msg']
@@ -94,14 +93,14 @@ def action(message):
     socketio.sleep()
 
 
-@socketio.on('text', namespace='/game')
-def text(message):
+@socketio.on('text', namespace=NAMESPACE)
+def send_chat_message(message):
     room = session.get('room')
     player = session.get('player')
     emit('chat_message', {'msg': '<{}>: {}'.format(player, message['msg'])}, room=room)
 
 
-@socketio.on('disconnect',  namespace='/game')
+@socketio.on('disconnect',  namespace=NAMESPACE)
 def disconnect_client():
     room = session.get('room')
     PLAYERS.pop(room, None)

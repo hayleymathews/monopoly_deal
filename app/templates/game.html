@@ -12,7 +12,7 @@
             $(document).ready(function(){
                 socket = io.connect(protocol + '//' + document.domain + ':' + location.port + '/game');
                 socket.on('connect', function() {
-                    socket.emit('joined', {}); 
+                    socket.emit('join_game', {}); 
                     $('#action').attr( "disabled", true);
                 });
 
@@ -34,7 +34,14 @@
                 socket.on('game_ready', function(data) {
                     $('#start_game').attr( "disabled", false);
                 });
+                socket.on('game_end', function(data) {
+                    $('#start_game').text("Play Again")
+                    $('#start_game').attr( "disabled", false);
+                });
                 socket.on('game_started', function(data) {
+                    $('#game_log').val('');
+                    $('#player_log').val('');
+                    $('#board').val('');
                     $('#start_game').attr( "disabled", true);
                     $('#start_game').attr( "title", "");
                     $('#add_bots').attr( "disabled", true);
@@ -86,13 +93,13 @@
             <div class="row">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                     <div class="btn-group mr-2" role="group" aria-label="First group">
-                        <button id="start_game" onclick="start_game();" class="btn btn-success mb-2" disabled title="need at least 2 players to play">Start Game</button>
+                        <button id="invite" type="button" class="btn btn-primary  mb-2" data-toggle="modal" data-target="#InviteModal">Invite Players</button>
                     </div>
-                    <div class="btn-group mr-2" role="group" aria-label="Second group">
+                    <div class="btn-group mr-2" role="group" aria-label="First group">
                         <button id="add_bots" onclick="add_bot();" class="btn btn-primary mb-2">Add Robot Player</button>
                     </div>
                     <div class="btn-group mr-2" role="group" aria-label="Second group">
-                        <button id="invite" type="button" class="btn btn-primary  mb-2" data-toggle="modal" data-target="#InviteModal">Invite Players</button>
+                        <button id="start_game" onclick="start_game();" class="btn btn-success mb-2" disabled title="need at least 2 players to play">Start Game</button>
                     </div>
                 </div>
             <div class="row">

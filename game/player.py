@@ -26,7 +26,7 @@ class Player(object):
         """
         self.hand.extend(deck.draw_cards(count))
 
-    def write(self, message, _channel=None):
+    def write(self, message, channel=None):
         """
         write message to player
 
@@ -34,7 +34,7 @@ class Player(object):
             message {str} -- message to send
 
         Keyword Arguments:
-            write_all {str} -- channel to send message to (default: {None})
+            channel {str} -- channel to send message to (default: {None})
         """
         raise NotImplementedError
 
@@ -89,11 +89,11 @@ class RandomPlayer(Player):
     """
     playable = False
 
-    def write(self, message, _channel=None):
+    def write(self, message, channel=None):
         # dont need i/o for bot
         pass
 
-    def read(self):
+    def read(self, prompt=None):
         # dont need i/o for bot
         pass
 
@@ -184,9 +184,6 @@ class PlayablePlayer(Player):
             return say_no_card
 
         return False
-    
-    def pay(self, bank, properties):
-        pass
 
 
 class TerminalPlayer(PlayablePlayer):
@@ -220,6 +217,7 @@ class TelNetPlayer(PlayablePlayer):
     @force_sync
     async def _get_input(self, prompt=None):
         # HACK: have to force this to be blocking so you actually recieve data
+        # really shouldn't use an async library to do this, but didnt want to write a telnet service myself
         if prompt:
             self.writer.write(prompt)
         self.reader._eof = False
@@ -232,20 +230,22 @@ class WebPlayer(PlayablePlayer):
     web player
     uses sockets to play over the internet
     """
-    def __init__(self, name, player_id, socket, responses):
+    def __init__(self, name, player_id, socket, namespace, responses):
         super(WebPlayer, self).__init__(name)
         self.player_id = player_id
         self.socket = socket
+        self.namespace = namespace
         self.responses = responses
 
     def write(self, message, channel='player_message'):
-        self.socket.emit(channel, {'msg': message}, room=self.player_id, namespace='/game')
+        self.socket.emit(channel, {'msg': message}, room=self.player_id, namespace=self.namespace)
         self.socket.sleep(0)
 
     def read(self, prompt=None):
         if prompt:
-            self.socket.emit('prompt', {'msg': prompt}, room=self.player_id, namespace='/game')
+            self.socket.emit('prompt', {'msg': prompt}, room=self.player_id, namespace=self.namespace)
             self.socket.sleep()
+
         # HACK: continuing in the tradition of incredibly lazy implementations
         # the action event that listens to responses from this prompt
         # writes to this shared global response dict, and we just read from it here
@@ -254,6 +254,7 @@ class WebPlayer(PlayablePlayer):
         while not resp:
             self.socket.sleep()
             resp = self.responses[self.player_id].pop('latest', None)
+
         # send a signal to client to stop allowing input for this player
-        self.socket.emit('end_input', {'msg': ''}, room=self.player_id, namespace='/game')
+        self.socket.emit('end_input', {'msg': ''}, room=self.player_id, namespace=self.namespace)
         return resp

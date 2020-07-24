@@ -44,11 +44,9 @@ class MonopDealGame(object):
             Player -- winning player
         """
         winner = False
-        rounds = 0  # TODO: write some tests, make sure this terminates
-        while not winner and rounds < 1000:
+        while not winner:
             winner = self.play_round()
-            rounds += 1
-        self._write_players('\rWinner: {} in {} rounds\n'.format(winner.name, rounds))
+        self._write_players('\rWinner: {}\n'.format(winner.name))
         return winner
 
     def play_round(self):
