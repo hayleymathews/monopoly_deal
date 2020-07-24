@@ -73,6 +73,7 @@ def start_game(message):
         return
 
     emit('game_started', {'msg': 'begin game'}, room=room)
+    emit('status', {'msg': 'players: {}'.format(', '.join(get_players(room)))})
 
     GAMES[room] = True
     mdg = MonopDealGame(PLAYERS[room].values(), verbose=True)
@@ -81,7 +82,7 @@ def start_game(message):
     emit('status', {'msg': '{} has won the game'.format(winner)}, room=room)
 
     GAMES.pop(room, None)
-    emit('game_end', {'msg': ''}, room=room)
+    emit('game_end', {'msg': True}, room=room)
 
 
 @socketio.on('action', namespace=NAMESPACE)
@@ -103,8 +104,16 @@ def send_chat_message(message):
 @socketio.on('disconnect',  namespace=NAMESPACE)
 def disconnect_client():
     room = session.get('room')
-    PLAYERS.pop(room, None)
-    ROBOTS.pop(room, None)
+    player_id = request.sid
+    player = session.get('player')
+    PLAYERS[room].pop(player_id, None)
     GAMES.pop(room, None)
-    close_room(room)
-    disconnect()
+
+    if len(PLAYERS[room]) >= 1:
+        emit('status', {'msg': '{} has exited.\ngame over'.format(player)}, room=room)
+        enough_players = len(PLAYERS[room]) >= 2
+        emit('game_end', {'msg': enough_players}, room=room)
+    else:
+        ROBOTS.pop(room, None)
+        close_room(room)
+        disconnect()

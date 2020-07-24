@@ -57,6 +57,7 @@ class MonopDealGame(object):
             bool -- Player if winner, else None
         """
         for player in self.players:
+            self._write_players("\r{} turn\n\r".format(player.name))
             self.take_turn(player)
             winner = self._check_win_condition()
             if winner:
