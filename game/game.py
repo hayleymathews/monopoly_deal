@@ -75,14 +75,12 @@ class MonopDealGame(object):
             player {Player} -- player instance
         """
         self.rent_level, actions = 1, 3
-        player.draw_cards(self.deck, 2)
 
-        # if player has no cards at begninning of turn they draw 5 instead of 3
-        if len(player.hand) == 2:
-            player.draw_cards(self.deck, 3)
+        # if player has no cards at begninning of turn they draw 5 instead of 2
+        draw_amount = 2 if player.hand else 5
+        player.draw_cards(self.deck, draw_amount)
 
         while actions:
-            # TODO: add ability for player to play cards into bank
             card = player.choose_action(player.hand + self.free_actions)
 
             self._write_players("\r{} played {}\n\r".format(player.name, card))
@@ -121,11 +119,27 @@ class MonopDealGame(object):
     #
     @cached_property
     def _card_map(self):
-        return {money_card: self._deposit_money,
-                property_card: self._lay_property,
+        return {property_card: self._play_property,
+                money_card: self._deposit_money,
                 rent_card: self._collect_rent,
                 action_card: self._do_action,
                 }
+
+    def _play_property(self,
+                       player,
+                       card):
+        """
+        let player choose to lay property or play into bank
+
+        Args:
+            player {Player} -- player playing property
+            card {property_card} -- property
+        """
+        action = player.choose_action(['lay property', 'deposit in bank'])
+        if action == 'lay property':
+            self._lay_property(player, card)
+        else:
+            self._deposit_money(player, card)
 
     def _deposit_money(self,
                        player,
@@ -385,3 +399,12 @@ class MonopDealGame(object):
         """
         wildcard_props = self.board.get_wildcard_properties(player)
         [self._lay_property(player, prop) for prop in wildcard_props]
+
+    #
+    # Gym Helpers
+    #
+    def observe_hand(self, player):
+        pass
+
+
+

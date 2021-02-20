@@ -118,6 +118,54 @@ class RandomPlayer(Player):
         return False
 
 
+class StrategyPlayer(Player):
+    """
+    tries to play game with some strategy
+
+    general strategy:
+    play money to bank before propety so people wont steal
+    play worst properties first
+    dont charge rent if you dont have that property
+    try to sly deal for a rent card you have
+    wait to complete property sets unless you have say nos
+    play pass go at start of turn
+    """
+    playable = False
+
+    def write(self, message, channel=None):
+        # dont need i/o for bot
+        pass
+
+    def read(self, prompt=None):
+        # dont need i/o for bot
+        pass
+
+    def choose_action(self, actions):
+        return random.choice(self._playable_actions(actions))
+
+    def discard_cards(self):
+        pass
+
+    def say_no(self):
+        pass
+
+
+class BotPlayer(Player):
+    """
+    learns game through RL
+    """
+    playable = False
+
+    def write(self, message, channel=None):
+        # dont need i/o for bot
+        pass
+
+    def read(self, prompt=None):
+        # dont need i/o for bot
+        pass
+
+
+
 class PlayablePlayer(Player):
     playable = True
 
