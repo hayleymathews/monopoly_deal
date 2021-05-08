@@ -3,7 +3,7 @@ click==7.1.2
 cloudpickle==1.2.2
 dnspython==1.16.0
 dominate==2.5.1
-eventlet==0.25.2
+eventlet==0.31.0
 Flask==1.1.2
 Flask-Bootstrap==3.3.7.1
 Flask-SocketIO==4.3.0
